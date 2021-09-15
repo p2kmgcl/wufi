@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "outDir": "build/js",
+    "strict": true,
+    "lib": [
+      "DOM",
+      "ES2018"
+    ],
+    "target": "ES2018"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "**/__test__/**"
+  ]
+}

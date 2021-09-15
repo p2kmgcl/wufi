@@ -1,0 +1,54 @@
+{
+  "name": "wufi",
+  "description": "Woffu daemon",
+  "version": "1.0.0",
+  "main": "build/js/index.js",
+  "author": {
+    "email": "contact@pablomolina.me",
+    "name": "Pablo Molina",
+    "url": "https://pablomolina.me"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": "^14.0.0"
+  },
+  "build": {
+    "appId": "me.pablomolina.wufi",
+    "files": [
+      "build/assets/**/*",
+      "build/js/**/*"
+    ],
+    "directories": {
+      "output": "build/pkg"
+    },
+    "linux": {
+      "category": "Network,Utility"
+    }
+  },
+  "scripts": {
+    "build": "yarn run clean && yarn run build:compile && yarn run build:copy && yarn run build:pkg",
+    "build:compile": "tsc --project tsconfig.json",
+    "build:copy": "ncp assets build/assets && ncp icons build/icons",
+    "build:pkg": "electron-builder --linux=appImage",
+    "clean": "rimraf build && mkdirp build",
+    "start": "yarn run clean && concurrently --kill-others npm:start:compile npm:start:copy npm:start:run",
+    "start:compile": "yarn run build:compile --watch",
+    "start:copy": "nodemon --exec \"yarn run build:copy\" --watch assets/ .",
+    "start:run": "nodemon --exec \"electron\" --watch build/ ."
+  },
+  "dependencies": {
+    "ts-node": "^10.2.1",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.0",
+    "concurrently": "^6.2.1",
+    "electron": "^13.2.2",
+    "electron-builder": "^22.11.7",
+    "mkdirp": "^1.0.4",
+    "ncp": "^2.0.0",
+    "nodemon": "^2.0.12",
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2"
+  }
+}
