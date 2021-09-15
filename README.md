@@ -7,7 +7,8 @@ $ WOFFU_USERNAME=me WOFFU_PASSWORD=ps build/pkg/wufi-1.0.0.AppImage
 ## To-Do
 
 - [X] Linux
-- [ ] Deno?
+- [ ] [Use API](https://liferay.woffu.com/swagger/ui/index#/Signs)
+- [ ] Rust?
 - [ ] Installable?
 - [ ] Windows?
 - [ ] Mac?
