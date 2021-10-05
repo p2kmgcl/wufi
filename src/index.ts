@@ -8,40 +8,21 @@ async function main() {
 
   let woffu: Woffu | undefined;
 
-  async function initWoffu() {
-    woffu?.destroy();
-    woffu = undefined;
-    statusIcon.setIcon('🔄');
-    const nextWoffu = new Woffu();
-    await nextWoffu.init();
-    await nextWoffu.login();
-    woffu = nextWoffu;
-  }
-
-  await initWoffu();
-
-  (async function loadStatus() {
-    if (destroyed) {
-      return;
-    }
-
-    if (woffu) {
-      const emoji = (await woffu.isWorking()) ? '💪' : '🏖️';
-      const [h, m] = (await woffu.getWorkedHours()).split(':').slice(0, 2);
-      statusIcon.setIcon(`${emoji} ${h}:${m}`);
-    } else {
-      statusIcon.setIcon('🔄');
-    }
-
-    setTimeout(loadStatus, 2000);
-  })();
-
   statusIcon.setContextMenu(
     Menu.buildFromTemplate([
       {
         label: 'Toggle work',
         type: 'normal',
-        click: () => woffu?.toggleWork(),
+        click: async () => {
+          const currentWoffu = woffu;
+
+          statusIcon.setIcon('🔄 Toggling');
+          await currentWoffu?.toggleWork();
+          statusIcon.setIcon('🔄 Waiting');
+
+          woffu = currentWoffu;
+          loadStatus();
+        },
       },
       {
         type: 'separator',
@@ -49,7 +30,10 @@ async function main() {
       {
         label: 'Reload window',
         type: 'normal',
-        click: () => initWoffu(),
+        click: async () => {
+          await initWoffu();
+          loadStatus();
+        },
       },
       {
         label: 'Show window',
@@ -69,6 +53,51 @@ async function main() {
       },
     ]),
   );
+
+  async function initWoffu() {
+    woffu?.destroy();
+    woffu = undefined;
+
+    try {
+      const nextWoffu = new Woffu();
+      statusIcon.setIcon('🔄 Initializing');
+      await nextWoffu.init();
+      statusIcon.setIcon('🔄 Logging in');
+      await nextWoffu.login();
+      statusIcon.setIcon('🔄 Ready');
+      woffu = nextWoffu;
+    } catch (error) {
+      statusIcon.setIcon('🟥 Error');
+    }
+  }
+
+  async function loadStatus() {
+    if (destroyed) {
+      return;
+    }
+
+    if (woffu) {
+      const emoji = (await woffu.isWorking()) ? '💪' : '🏖️';
+      const [h, m] = (await woffu.getWorkedHours()).split(':').slice(0, 2);
+      statusIcon.setIcon(`${emoji} ${h}:${m}`);
+    } else {
+      statusIcon.setIcon('🔄 Waiting');
+    }
+  }
+
+  async function loadStatusLoop() {
+    try {
+      await loadStatus();
+    } catch (error) {
+      console.error(error);
+    }
+
+    setTimeout(loadStatusLoop, 10000);
+    return new Promise(() => {});
+  }
+
+  await initWoffu();
+  await loadStatusLoop();
 }
 
 app
